@@ -1,0 +1,125 @@
+container_memory_usage_bytes
+
+
+prometheus_http_requests_total>=2
+
+groups:
+- name: devopscube demo alert
+  rules:
+  - alert: High Pod Memory
+    expr: sum(container_memory_usage_bytes) > 1
+    for: 1m
+    labels:
+      severity: slack
+    annotations:
+      summary: High Memory Usage/etc/prometheus
+
+
+groups:
+- name: prometheus http requests
+  rules:
+  - alert: High http requests
+    expr: prometheus_http_requests_total>=2
+    for: 1m
+    labels:
+      severity: slack
+    annotations:
+      summary: High http request Usage
+
+
+https://awesome-prometheus-alerts.grep.to/rules.html
+
+++++++++++++++++++++++++++++++++++++++++++++++++
+Blackbox probe slow HTTP
+HTTP request took more than 1s
+
+++++++++++++++++++++++++++++++++++++++++++++++++
+
+  - alert: BlackboxProbeSlowHttp
+    expr: avg_over_time(probe_http_duration_seconds[1m]) > 1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: Blackbox probe slow HTTP (instance {{ $labels.instance }})
+      description: "HTTP request took more than 1s\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+      
+      
+*******************************************************************************************
+MySQL too many connections (> 80%)
+More than 80% of MySQL connections are in use on {{ $labels.instance }}
+
+******************************************************************************************
+
+ - alert: MysqlTooManyConnections(>80%)
+    expr: avg by (instance) (rate(mysql_global_status_threads_connected[1m])) / avg by (instance) (mysql_global_variables_max_connections) * 100 > 80
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: MySQL too many connections (> 80%) (instance {{ $labels.instance }})
+      description: "More than 80% of MySQL connections are in use on {{ $labels.instance }}\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+      
+      
+*************************************************************************************************************
+
+https://www.youtube.com/watch?v=4IAtwCmG6cs
+
+https://www.youtube.com/watch?v=oNSop2jPiD8
+
+padamkiran/nodejs-hello:v1
+
+
+
+login promet
+
+docker:tcuser
+
+kubectl get po -n monitoring -o wide
+
+output:
+
+NAME                                     READY   STATUS    RESTARTS      AGE     IP           NODE       NOMINATED NODE   READINESS GATES
+prometheus-deployment-599bbd9457-9mmdd   1/1     Running   2 (46m ago)   2d20h   172.17.0.3   minikube   <none>           <none>
+
+
+ssh docker@minikube
+
+pasword:  tcuser
+
+sudo docker ps | grep monitoring
+
+output:
+
+a28513341039   prom/prometheus           "/bin/prometheus --c…"   23 minutes ago   Up 23 minutes   k8s_prometheus_prometheus-deployment-599bbd9457-9mmdd_monitoring_278a8fed-8cc7-42c0-986d-250df1066962_2
+c2e231b80959   k8s.gcr.io/pause:3.5      "/pause"                 23 minutes ago   Up 23 minutes   k8s_POD_prometheus-deployment-599bbd9457-9mmdd_monitoring_278a8fed-8cc7-42c0-986d-250df1066962_2
+
+kubectl exec -it prometheus-deployment-599bbd9457-9mmdd /bin/sh -n monitoring
+
+cd /etc/prometheus
+
+cat prometheus.rules
+
+groups:
+- name: devopscube demo alert
+  rules:
+  - alert: High Pod Memory
+    expr: sum(container_memory_usage_bytes) > 1
+    for: 1m
+    labels:
+      severity: slack
+    annotations:
+      summary: High Memory Usage
+      
+docker ps |grep prom/prometheus
+
+
+https://www.suse.com/c/rancher_blog/custom-alerts-using-prometheus-queries/
+
+- name: Blackbox probe slow HTTP
+                description: HTTP request took more than 1s
+                query: 'avg_over_time(probe_http_duration_seconds[1m]) > 1'
+                severity: warning
+                for: 1m
+                
+curl -X POST http://localhost:9090/-/reload
